@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         title: const Text(
-          'STASH git',
+          'STASH',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
