@@ -58,30 +58,40 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
-                    child: TextField(
-                      controller: clearcntrl,
-                      onChanged: (value) {
-                        TransactionDb.instance.search(
-                          value,
-                        );
-                      },
-                      decoration: InputDecoration(
-                          hintText: 'Search..',
-                          border: InputBorder.none,
-                          icon: const Icon(
-                            Icons.search,
-                            // color: textClr,
+                    child: Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        TextField(
+                          controller: clearcntrl,
+                          onChanged: (value) {
+                            TransactionDb.instance.search(value);
+                            setState(
+                                () {}); // Update the state to trigger rebuild
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Search..',
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.search,
+                              // color: textClr,
+                            ),
                           ),
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                clearcntrl.clear();
-                                TransactionDb.instance.refresh();
-                                CategoryDB.instance.refreshUI();
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                // color: Colors.black,
-                              ))),
+                        ),
+                        if (clearcntrl.text.isNotEmpty)
+                          IconButton(
+                            onPressed: () {
+                              clearcntrl.clear();
+                              TransactionDb.instance.refresh();
+                              CategoryDB.instance.refreshUI();
+                              setState(
+                                  () {}); // Update the state to trigger rebuild
+                            },
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.blue,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
