@@ -69,7 +69,7 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                                 () {}); // Update the state to trigger rebuild
                           },
                           decoration: const InputDecoration(
-                            hintText: 'Search..',
+                            hintText: 'Search By Category Name..',
                             border: InputBorder.none,
                             icon: Icon(
                               Icons.search,
