@@ -21,6 +21,14 @@ class VeiwAllScreen extends StatefulWidget {
 class _VeiwAllScreenState extends State<VeiwAllScreen> {
   TextEditingController searchController = TextEditingController();
   var clearcntrl = TextEditingController();
+  ValueNotifier<bool> clearButtonNotifier = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    clearcntrl.dispose();
+    clearButtonNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,48 +58,61 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(10),
-                child: Card(
-                  elevation: 9,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        TextField(
-                          controller: clearcntrl,
-                          onChanged: (value) {
-                            TransactionDb.instance.search(value);
-                            setState(
-                                () {}); // Update the state to trigger rebuild
-                          },
-                          decoration: const InputDecoration(
-                            hintText: 'Search By Category Name..',
-                            border: InputBorder.none,
-                            icon: Icon(
-                              Icons.search,
-                              // color: textClr,
-                            ),
-                          ),
-                        ),
-                        if (clearcntrl.text.isNotEmpty)
-                          IconButton(
-                            onPressed: () {
-                              clearcntrl.clear();
-                              TransactionDb.instance.refresh();
-                              CategoryDB.instance.refreshUI();
-                              setState(
-                                  () {}); // Update the state to trigger rebuild
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: clearButtonNotifier,
+                  builder: (context, valuebool, child) => Card(
+                    elevation: 9,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          TextField(
+                            controller: clearcntrl,
+                            onChanged: (value) {
+                              TransactionDb.instance.search(value);
+
+                              if (value.isEmpty) {
+                                clearButtonNotifier.value = false;
+                                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                                clearButtonNotifier.notifyListeners();
+                              } else {
+                                clearButtonNotifier.value = true;
+                                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                                clearButtonNotifier.notifyListeners();
+                              }
                             },
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.blue,
+                            decoration: const InputDecoration(
+                              hintText: 'Search By Category Name..',
+                              border: InputBorder.none,
+                              icon: Icon(
+                                Icons.search,
+                                // color: textClr,
+                              ),
                             ),
                           ),
-                      ],
+                          Visibility(
+                            visible: clearButtonNotifier.value,
+                            child: IconButton(
+                              
+                              onPressed: () {
+                                clearcntrl.clear();
+                                setState(() {
+                                  clearButtonNotifier.value = false;
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),

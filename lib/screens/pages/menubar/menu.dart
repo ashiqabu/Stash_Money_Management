@@ -87,7 +87,7 @@ class _MenuScreenState extends State<MenuScreen> {
             color: mainColor,
           ),
           title: const Text(
-            'Privacy Policy',
+            'Terms And Condition',
             style: TextStyle(fontSize: 15),
           ),
           // ignore: avoid_returning_null_for_void
@@ -98,7 +98,8 @@ class _MenuScreenState extends State<MenuScreen> {
         ),
         ListTile(
           leading: const Icon(
-            Icons.list,
+            Icons.privacy_tip
+            ,
             color: mainColor,
           ),
           title: const Text(
