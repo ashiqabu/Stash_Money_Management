@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stash_project/core/constants.dart';
 import 'package:stash_project/db/profile/profile_db.dart';
 import 'package:stash_project/screens/pages/menubar/addprofile.dart';
+import 'package:stash_project/screens/pages/menubar/privacy_policy.dart';
 import 'package:stash_project/screens/pages/menubar/reset.dart';
 import 'package:stash_project/screens/pages/menubar/terms_and_condition.dart';
 
@@ -86,7 +87,7 @@ class _MenuScreenState extends State<MenuScreen> {
             color: mainColor,
           ),
           title: const Text(
-            'Term and Condition',
+            'Privacy Policy',
             style: TextStyle(fontSize: 15),
           ),
           // ignore: avoid_returning_null_for_void
@@ -94,6 +95,19 @@ class _MenuScreenState extends State<MenuScreen> {
               context,
               MaterialPageRoute(
                   builder: (context) => const TermsAndConditions())),
+        ),
+        ListTile(
+          leading: const Icon(
+            Icons.list,
+            color: mainColor,
+          ),
+          title: const Text(
+            'Privacy Policy',
+            style: TextStyle(fontSize: 15),
+          ),
+          // ignore: avoid_returning_null_for_void
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const PrivacyPolicy())),
         ),
         ListTile(
           leading: const Icon(
