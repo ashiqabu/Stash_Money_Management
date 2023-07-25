@@ -48,15 +48,15 @@ class TransactionDb implements TransactionDbFunction {
   }
 
   @override
-  Future<void> deletTransaction(int index) async {
+  Future<void> deletTransaction(int id) async {
     final db = await Hive.openBox<TranscationModel>(TRANSACTION_DB_NAME);
-    db.deleteAt(index);
+    db.deleteAt(id);
     refresh();
   }
 
-  Future<void> editTransactionDb(int index, TranscationModel model) async {
+  Future<void> editTransactionDb(int id, TranscationModel model) async {
     final db = await Hive.openBox<TranscationModel>(TRANSACTION_DB_NAME);
-    await db.putAt(index, model);
+    await db.putAt(id, model);
     transactionListNotifier.value.clear();
     transactionListNotifier.value.addAll(db.values);
     getAllTransaction();

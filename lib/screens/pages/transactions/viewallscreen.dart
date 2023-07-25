@@ -147,7 +147,7 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                                                 builder: (context) =>
                                                     EditTransaction(
                                                       data: value,
-                                                      index: index,
+                                                      id: index,
                                                     )));
                                       },
                                       icon: Icons.edit,

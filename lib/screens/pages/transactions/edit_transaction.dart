@@ -13,8 +13,8 @@ import '../../../db/chart/chart_db.dart';
 // ignore: must_be_immutable
 class EditTransaction extends StatefulWidget {
   TranscationModel data;
-  final int index;
-  EditTransaction({super.key, required this.data, required this.index});
+  final int id;
+  EditTransaction({super.key, required this.data, required this.id});
 
   @override
   State<EditTransaction> createState() => _EditTransactionState();
@@ -298,7 +298,7 @@ class _EditTransactionState extends State<EditTransaction> {
 
     TransactionDb transactionDb = TransactionDb();
     final index = transactionDb.transactionListNotifier.value
-        .indexOf(transactionDb.transactionListNotifier.value[widget.index]);
+        .indexOf(transactionDb.transactionListNotifier.value[widget.id]);
     transactionDb.editTransactionDb(index, model);
     // ignore: use_build_context_synchronously
 
