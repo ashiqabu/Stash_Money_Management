@@ -13,6 +13,7 @@ import '../../../db/transaction/transaction_db.dart';
 import '../../../models/category/category_model.dart';
 import '../../../models/transaction/transaction_model.dart';
 import '../menubar/menu.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -338,9 +339,12 @@ class HomeScreen extends StatelessWidget {
                           itemCount: newList.length > 3 ? 3 : newList.length)
                       : Center(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
+                            children: [
+                              const SizedBox(height: 4),
+                              Lottie.asset('enimations/animation_lkknttjy.json',
+                                  width: 195.w, height: 195.h),
+                              kHeight(5.h),
+                              const Text(
                                 "  No transactions yet !",
                                 style: TextStyle(
                                   fontSize: 20,
@@ -384,6 +388,7 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () {
                     TransactionDb.instance.deletTransaction(index);
                     Navigator.of(ctx).pop();
+                    balanceAmount();
                   },
                   child: const Text("Yes"))
             ],

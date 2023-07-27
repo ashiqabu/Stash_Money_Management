@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:stash_project/db/transaction/transaction_db.dart';
 import 'package:stash_project/models/category/category_model.dart';
 import 'package:stash_project/models/transaction/transaction_model.dart';
@@ -98,7 +99,6 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                           Visibility(
                             visible: clearButtonNotifier.value,
                             child: IconButton(
-                              
                               onPressed: () {
                                 clearcntrl.clear();
                                 setState(() {
@@ -191,17 +191,25 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                           // ignore: prefer_is_empty
                           itemCount: newList.length)
                       : Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                "  No transactions yet !",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.grey,
+                          child: Padding(
+                            padding:const EdgeInsets.only(top: 49),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 4),
+                                Lottie.asset(
+                                    'enimations/animation_lkknttjy.json',
+                                    width: 195.w,
+                                    height: 195.h),
+                                kHeight(5.h),
+                                const Text(
+                                  "  No transactions yet !",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ));
             },

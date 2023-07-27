@@ -40,6 +40,7 @@ dependencies:
   hive_generator: ^2.0.0
   image_picker: ^0.8.7+4
   intl: ^0.17.0
+  lottie: ^2.3.2
   shared_preferences: ^2.1.1
   syncfusion_flutter_charts: ^19.1.54
 
@@ -69,6 +70,7 @@ flutter:
   assets:
     - assets\nature.jpg
     - assets\man.jpg
+    - enimations\animation_lkknttjy.json
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
   # For details regarding adding assets from package dependencies, see
