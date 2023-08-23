@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stash_project/db/category/category_db.dart';
-
-import '../../category/addcategorypop_up.dart';
+import 'package:provider/provider.dart';
+import 'package:stash_project/provider.dart/category_provider.dart';
 import '../../category/expense.dart';
 import '../../category/income.dart';
 import '../menubar/menu.dart';
@@ -18,8 +17,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   void initState() {
-    CategoryDB().refreshUI();
+    //CategoryDB().refreshUI();
     super.initState();
+    Provider.of<CategoryProvider>(context, listen: false).refreshUI();
   }
 
   @override
@@ -48,7 +48,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           IncomeScreen(),
           ExpenseScreen(),
         ]),
-       
       ),
     );
   }

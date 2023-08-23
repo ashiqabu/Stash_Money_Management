@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stash_project/db/category/category_db.dart';
 import 'package:stash_project/db/transaction/transaction_db.dart';
 
 import '../../../core/constants.dart';
+import '../../../provider.dart/category_provider.dart';
+import '../../../provider.dart/transaction_provider.dart';
 import '../bottom-nav/bottomnav.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,8 +24,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    CategoryDB.instance.refreshUI();
-    TransactionDb.instance.refresh();
+    // CategoryDB.instance.refreshUI();
+    // TransactionDb.instance.refresh();
+      Provider.of<TransactionProvider>(context, listen: false).refresh();
+ Provider.of<CategoryProvider>(context, listen: false).refreshUI();
     Timer(
         const Duration(seconds: 2),
         () => Navigator.pushReplacement(context,

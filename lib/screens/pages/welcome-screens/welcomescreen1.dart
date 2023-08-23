@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stash_project/screens/pages/splashscreen/splashscreen.dart';
 import 'package:stash_project/screens/pages/welcome-screens/welcomemessage2.dart';
 import '../../../db/category/category_db.dart';
 import '../../../db/transaction/transaction_db.dart';
+import '../../../provider.dart/category_provider.dart';
+import '../../../provider.dart/transaction_provider.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -37,8 +40,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    TransactionDb.instance.refresh();
-    CategoryDB.instance.refreshUI();
+    // TransactionDb.instance.refresh();
+    // CategoryDB.instance.refreshUI();
+      Provider.of<TransactionProvider>(context, listen: false).refresh();
+ Provider.of<CategoryProvider>(context, listen: false).refreshUI();
     return MaterialApp(
       home: SafeArea(
         child: Scaffold(

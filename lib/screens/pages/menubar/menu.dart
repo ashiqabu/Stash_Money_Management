@@ -30,8 +30,8 @@ class _MenuScreenState extends State<MenuScreen> {
         ValueListenableBuilder(
           valueListenable: profilelistnotifier,
           builder: (context, value, _) => UserAccountsDrawerHeader(
-            accountName: Text(userdata?.name ?? 'Name'),
-            accountEmail: Text(userdata?.email ?? 'Example@email.com'),
+            accountName: Text(userdata?.name ?? 'Stash'),
+            accountEmail: Text(userdata?.email ?? 'stashSupport@gmail.com'),
             currentAccountPicture: CircleAvatar(
               child: userdata?.image == null
                   ? ClipOval(
@@ -98,8 +98,7 @@ class _MenuScreenState extends State<MenuScreen> {
         ),
         ListTile(
           leading: const Icon(
-            Icons.privacy_tip
-            ,
+            Icons.privacy_tip,
             color: mainColor,
           ),
           title: const Text(
@@ -110,22 +109,22 @@ class _MenuScreenState extends State<MenuScreen> {
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (context) => const PrivacyPolicy())),
         ),
-        ListTile(
-          leading: const Icon(
-            Icons.add_a_photo,
-            color: mainColor,
-          ),
-          title: ValueListenableBuilder(
-            valueListenable: profilelistnotifier,
-            builder: (context, value, child) => Text(
-              userdata?.name == null ? 'Add Profile' : 'Update Profile',
-              style: const TextStyle(fontSize: 15),
-            ),
-          ),
-          // ignore: avoid_returning_null_for_void
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddProfile())),
-        )
+        // ListTile(
+        //   leading: const Icon(
+        //     Icons.add_a_photo,
+        //     color: mainColor,
+        //   ),
+        //   title: ValueListenableBuilder(
+        //     valueListenable: profilelistnotifier,
+        //     builder: (context, value, child) => Text(
+        //       userdata?.name == null ? 'Add Profile' : 'Update Profile',
+        //       style: const TextStyle(fontSize: 15),
+        //     ),
+        //   ),
+        //   // ignore: avoid_returning_null_for_void
+        //   onTap: () => Navigator.push(context,
+        //       MaterialPageRoute(builder: (context) => const AddProfile())),
+        // )
       ]),
     );
   }

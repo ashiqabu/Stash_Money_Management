@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stash_project/db/chart/chart_db.dart';
+import 'package:provider/provider.dart';
+import 'package:stash_project/provider.dart/category_provider.dart';
+import 'package:stash_project/provider.dart/transaction_provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
-import '../../../db/category/category_db.dart';
-import '../../../db/transaction/transaction_db.dart';
+import '../../../provider.dart/chart_provider.dart';
 import '../menubar/menu.dart';
 import 'insights_model.dart';
 
@@ -16,22 +16,21 @@ class FinancialReport extends StatefulWidget {
 
 class _FinancialReportState extends State<FinancialReport>
     with TickerProviderStateMixin {
-  List<ChartDatas> dataExpense = chartLogic(expenseNotifier1.value);
-  List<ChartDatas> dataIncome = chartLogic(incomeNotifier1.value);
-  List<ChartDatas> overview = chartLogic(overviewNotifier.value);
-  List<ChartDatas> yesterday = chartLogic(yesterdayNotifier.value);
-  List<ChartDatas> today = chartLogic(todayNotifier.value);
-  List<ChartDatas> month = chartLogic(lastMonthNotifier.value);
-  List<ChartDatas> week = chartLogic(lastWeekNotifier.value);
-  List<ChartDatas> todayIncome = chartLogic(incomeTodayNotifier.value);
-  List<ChartDatas> incomeYesterday = chartLogic(incomeYesterdayNotifier.value);
-  List<ChartDatas> incomeweek = chartLogic(incomeLastWeekNotifier.value);
-  List<ChartDatas> incomemonth = chartLogic(incomeLastMonthNotifier.value);
-  List<ChartDatas> todayExpense = chartLogic(expenseTodayNotifier.value);
-  List<ChartDatas> expenseYesterday =
-      chartLogic(expenseYesterdayNotifier.value);
-  List<ChartDatas> expenseweek = chartLogic(expenseLastWeekNotifier.value);
-  List<ChartDatas> expensemonth = chartLogic(expenseLastMonthNotifier.value);
+  List<ChartDatas> dataExpense = chartLogic(expenseNotifier1);
+  List<ChartDatas> dataIncome = chartLogic(incomeNotifier1);
+  List<ChartDatas> overview = chartLogic(overviewNotifier);
+  List<ChartDatas> yesterday = chartLogic(yesterdayNotifier);
+  List<ChartDatas> today = chartLogic(todayNotifier);
+  List<ChartDatas> month = chartLogic(lastMonthNotifier);
+  List<ChartDatas> week = chartLogic(lastWeekNotifier);
+  List<ChartDatas> todayIncome = chartLogic(incomeTodayNotifier);
+  List<ChartDatas> incomeYesterday = chartLogic(incomeYesterdayNotifier);
+  List<ChartDatas> incomeweek = chartLogic(incomeLastWeekNotifier);
+  List<ChartDatas> incomemonth = chartLogic(incomeLastMonthNotifier);
+  List<ChartDatas> todayExpense = chartLogic(expenseTodayNotifier);
+  List<ChartDatas> expenseYesterday = chartLogic(expenseYesterdayNotifier);
+  List<ChartDatas> expenseweek = chartLogic(expenseLastWeekNotifier);
+  List<ChartDatas> expensemonth = chartLogic(expenseLastMonthNotifier);
   late TabController tabController;
   late TooltipBehavior tooltipBehavior;
 
@@ -39,10 +38,9 @@ class _FinancialReportState extends State<FinancialReport>
   void initState() {
     tabController = TabController(length: 3, vsync: this);
     tooltipBehavior = TooltipBehavior(enable: true);
-    filterFunction();
-    CategoryDB().refreshUI();
-    TransactionDb().refresh();
-
+    Provider.of<ChartProvider>(context, listen: false).filterFunction(context);
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
+    Provider.of<CategoryProvider>(context, listen: false).refreshUI();
     super.initState();
   }
 
@@ -51,9 +49,11 @@ class _FinancialReportState extends State<FinancialReport>
 
   @override
   Widget build(BuildContext context) {
-    CategoryDB.instance.refreshUI();
-    TransactionDb.instance.refresh();
-    filterFunction();
+    //
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
+    Provider.of<CategoryProvider>(context, listen: false).refreshUI();
+    Provider.of<ChartProvider>(context, listen: false).filterFunction(context);
+
     chartdivertFunctionOverview();
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -65,11 +65,24 @@ class _FinancialReportState extends State<FinancialReport>
           'Insights',
         ),
         backgroundColor: const Color.fromARGB(225, 53, 9, 85),
+        actions: <Widget>[
+          IconButton(
+              onPressed: () {
+                Provider.of<TransactionProvider>(context, listen: false)
+                    .refresh();
+                Provider.of<CategoryProvider>(context, listen: false)
+                    .refreshUI();
+                Provider.of<TransactionProvider>(context, listen: false)
+                    .balanceAmount();
+                Provider.of<ChartProvider>(context, listen: false)
+                    .filterFunction(context);
+              },
+              icon: const Icon(Icons.refresh_outlined))
+        ],
       ),
       body: SingleChildScrollView(
-        child: ValueListenableBuilder(
-          valueListenable: expenseNotifier1,
-          builder: (context, value, Widget? _) => Column(
+        child: Consumer<ChartProvider>(builder: (context, chartProvider, _) {
+          return Column(
             children: [
               SizedBox(
                 height: height * 0.039,
@@ -290,8 +303,8 @@ class _FinancialReportState extends State<FinancialReport>
                 ),
               ),
             ],
-          ),
-        ),
+          );
+        }),
       ),
     );
   }

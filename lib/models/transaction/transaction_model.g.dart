@@ -22,7 +22,8 @@ class TranscationModelAdapter extends TypeAdapter<TranscationModel> {
       date: fields[2] as DateTime,
       type: fields[3] as CategoryType,
       category: fields[4] as CategoryModel,
-    )..id = fields[5] as String?;
+      id: fields[5] as String?,
+    );
   }
 
   @override

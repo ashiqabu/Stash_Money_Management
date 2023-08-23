@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:stash_project/balance/balance.dart';
+import 'package:provider/provider.dart';
+import 'package:stash_project/provider.dart/category_provider.dart';
+import 'package:stash_project/provider.dart/chart_provider.dart';
 import 'package:stash_project/screens/pages/transactions/edit_transaction.dart';
 import 'package:stash_project/screens/pages/transactions/viewallscreen.dart';
 import '../../../core/constants.dart';
-import '../../../db/category/category_db.dart';
-import '../../../db/chart/chart_db.dart';
-import '../../../db/transaction/transaction_db.dart';
 import '../../../models/category/category_model.dart';
 import '../../../models/transaction/transaction_model.dart';
+import '../../../provider.dart/transaction_provider.dart';
 import '../menubar/menu.dart';
 import 'package:lottie/lottie.dart';
 
@@ -20,26 +20,33 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TransactionDb.instance.refresh();
-    CategoryDB.instance.refreshUI();
-    balanceAmount();
-    filterFunction();
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
+    Provider.of<CategoryProvider>(context, listen: false).refreshUI();
+    Provider.of<TransactionProvider>(context, listen: false).balanceAmount();
+    Provider.of<ChartProvider>(context, listen: false).filterFunction(context);
 
     List<TranscationModel> transactions = [];
     return Scaffold(
-      drawer: const MenuScreen(),
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text(
-          'STASH',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        drawer: const MenuScreen(),
+        appBar: AppBar(
+          elevation: 0,
+          title: const Text(
+            'STASH',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          backgroundColor: mainColor,
+          actions: <Widget>[
+            IconButton(onPressed: () {
+              Provider.of<TransactionProvider>(context, listen: false).refresh();
+              Provider.of<CategoryProvider>(context, listen: false).refreshUI();
+              Provider.of<TransactionProvider>(context, listen: false).balanceAmount();
+              Provider.of<ChartProvider>(context, listen: false).filterFunction(context);
+            },
+             icon:const Icon(Icons.refresh_outlined))
+          ],
         ),
-        centerTitle: true,
-        backgroundColor: mainColor,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
             height: 220.h,
             child: Stack(
@@ -80,48 +87,48 @@ class HomeScreen extends StatelessWidget {
                           kHeight(10.h),
                           Column(
                             children: [
-                              ValueListenableBuilder(
-                                valueListenable: totalnotifier,
-                                builder: (context, value, child) {
-                                  return Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            totalnotifier.value < 0
-                                                ? 'Loss'
-                                                : 'Balance',
-                                            style: const TextStyle(
-                                              fontSize: 28,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                              Consumer<TransactionProvider>(
+                                  builder: (context, transactionProvider, _) {
+                                return Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          transactionProvider
+                                                      .totalnotifier.value <
+                                                  0
+                                              ? 'Loss'
+                                              : 'Balance',
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(
-                                            Icons.currency_rupee,
-                                            size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.currency_rupee,
+                                          size: 20,
+                                        ),
+                                        Text(
+                                          ' ${transactionProvider.totalnotifier.value.toString()}',
+                                          style: const TextStyle(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          Text(
-                                            ' ${totalnotifier.value.toString()}',
-                                            style: const TextStyle(
-                                              fontSize: 35,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }),
                             ],
                           ),
                           Column(
@@ -153,78 +160,72 @@ class HomeScreen extends StatelessWidget {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      ValueListenableBuilder(
-                                        valueListenable: incomenotifier,
-                                        builder: (context, value, child) {
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                color: mainColor),
-                                            height: 40,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  const Icon(
-                                                      Icons.currency_rupee,
-                                                      size: 15,
+                                      Consumer<TransactionProvider>(builder:
+                                          (context, transactionProvider, _) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              color: mainColor),
+                                          height: 40,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.currency_rupee,
+                                                    size: 15,
+                                                    color: Colors.white),
+                                                Text(
+                                                  transactionProvider
+                                                      .incomenotifier.value
+                                                      .toString(),
+                                                  style: const TextStyle(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       color: Colors.white),
-                                                  Text(
-                                                    incomenotifier.value
-                                                        .toString(),
-                                                    style: const TextStyle(
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white),
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      ValueListenableBuilder(
-                                        valueListenable: expensenotifier,
-                                        builder: (context, value, child) {
-                                          return Container(
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                color: mainColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  const Icon(
-                                                      Icons.currency_rupee,
-                                                      size: 15,
+                                          ),
+                                        );
+                                      }),
+                                      Consumer<TransactionProvider>(builder:
+                                          (context, transactionProvider, _) {
+                                        return Container(
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              color: mainColor),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.currency_rupee,
+                                                    size: 15,
+                                                    color: Colors.white),
+                                                Text(
+                                                  transactionProvider
+                                                      .expensenotifier.value
+                                                      .toString(),
+                                                  style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       color: Colors.white),
-                                                  Text(
-                                                    expensenotifier.value
-                                                        .toString(),
-                                                    style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white),
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          );
-                                        },
-                                      ),
+                                          ),
+                                        );
+                                      }),
                                     ],
                                   ),
                                 ],
@@ -253,8 +254,11 @@ class HomeScreen extends StatelessWidget {
                       style:
                           ElevatedButton.styleFrom(backgroundColor: mainColor),
                       onPressed: () {
-                        TransactionDb.instance.refresh();
-                        CategoryDB.instance.refreshUI();
+                        Provider.of<TransactionProvider>(context, listen: false)
+                            .refresh();
+                        // CategoryDB.instance.refreshUI();
+                        Provider.of<CategoryProvider>(context, listen: false)
+                            .refreshUI();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -268,16 +272,14 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           kHeight(10.h),
-          ValueListenableBuilder(
-            valueListenable: TransactionDb.instance.transactionListNotifier,
-            builder:
-                (BuildContext ctx, List<TranscationModel> newList, Widget? _) {
-              transactions = newList;
+          Consumer<TransactionProvider>(
+            builder: (context, transactionProviderClass, child) {
               return Expanded(
-                  child: newList.isNotEmpty
+                  child: transactionProviderClass.transactionList.isNotEmpty
                       ? ListView.separated(
-                          itemBuilder: (ctx, index) {
-                            final value = newList[index];
+                          itemBuilder: (ctx, id) {
+                            final value =
+                                transactionProviderClass.transactionList[id];
                             return Slidable(
                               key: Key(value.id!),
                               endActionPane: ActionPane(
@@ -285,7 +287,37 @@ class HomeScreen extends StatelessWidget {
                                   children: [
                                     SlidableAction(
                                       onPressed: (ctx) {
-                                        showAlert(context, index);
+                                        //showAlert(context, id);
+                                        value;
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text('Delete'),
+                                                content: const Text(
+                                                    'Are you sure?Do you want to delete this transaction?'),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child:
+                                                          const Text('Cancel')),
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        context
+                                                            .read<
+                                                                TransactionProvider>()
+                                                            .deletTransaction(
+                                                                value.id!);
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child: const Text('Ok'))
+                                                ],
+                                              );
+                                            });
                                       },
                                       icon: Icons.delete,
                                       label: 'Delete',
@@ -297,7 +329,8 @@ class HomeScreen extends StatelessWidget {
                                                 builder: (context) =>
                                                     EditTransaction(
                                                       data: value,
-                                                      id: index,
+                                                      id: id,
+                                                      model: value,
                                                     )));
                                       },
                                       icon: Icons.edit,
@@ -336,7 +369,11 @@ class HomeScreen extends StatelessWidget {
                             return kHeight(10.h);
                           },
                           // ignore: prefer_is_empty
-                          itemCount: newList.length > 3 ? 3 : newList.length)
+                          itemCount: transactionProviderClass
+                                      .transactionList.length >
+                                  3
+                              ? 3
+                              : transactionProviderClass.transactionList.length)
                       : Center(
                           child: Column(
                             children: [
@@ -356,9 +393,7 @@ class HomeScreen extends StatelessWidget {
                         ));
             },
           )
-        ],
-      ),
-    );
+        ]));
   }
 
   String parseDate(DateTime date) {
@@ -367,33 +402,5 @@ class HomeScreen extends StatelessWidget {
     return '${splitedDate.last}\n${splitedDate.first}';
   }
 
-  void showAlert(BuildContext context, int index) {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: const Text(
-              'Do you want to delete',
-              style: TextStyle(color: Color.fromARGB(255, 228, 15, 15)),
-            ),
-            content: const Text(
-                'All the related datas will be cleared from the database'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: const Text("No")),
-              TextButton(
-                  onPressed: () {
-                    TransactionDb.instance.deletTransaction(index);
-                    Navigator.of(ctx).pop();
-                    balanceAmount();
-                  },
-                  child: const Text("Yes"))
-            ],
-          );
-        });
-  }
+  
 }
-// 

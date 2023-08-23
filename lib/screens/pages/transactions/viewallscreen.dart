@@ -3,14 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stash_project/db/transaction/transaction_db.dart';
+import 'package:provider/provider.dart';
 import 'package:stash_project/models/category/category_model.dart';
 import 'package:stash_project/models/transaction/transaction_model.dart';
+import 'package:stash_project/provider.dart/transaction_provider.dart';
 import 'package:stash_project/screens/pages/transactions/edit_transaction.dart';
-import '../../../balance/balance.dart';
 import '../../../core/constants.dart';
-import '../../../db/category/category_db.dart';
-import '../../../db/chart/chart_db.dart';
+import '../../../provider.dart/category_provider.dart';
+import '../../../provider.dart/chart_provider.dart';
 
 class VeiwAllScreen extends StatefulWidget {
   const VeiwAllScreen({super.key, required this.transactions});
@@ -33,101 +33,103 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
 
   @override
   Widget build(BuildContext context) {
-    TransactionDb.instance.refresh();
-    CategoryDB.instance.refreshUI();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainColor,
-        title: const Text('All Transactions'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () {
-                showPopupMenu1();
-              },
-              icon: const Icon(Icons.sort)),
-          IconButton(
-              onPressed: () {
-                showPopupMenu();
-              },
-              icon: const Icon(Icons.calendar_month))
-        ],
-      ),
-      body: Column(
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: clearButtonNotifier,
-                  builder: (context, valuebool, child) => Card(
-                    elevation: 9,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      child: Stack(
-                        alignment: Alignment.centerRight,
-                        children: [
-                          TextField(
-                            controller: clearcntrl,
-                            onChanged: (value) {
-                              TransactionDb.instance.search(value);
-
-                              if (value.isEmpty) {
-                                clearButtonNotifier.value = false;
-                                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-                                clearButtonNotifier.notifyListeners();
-                              } else {
-                                clearButtonNotifier.value = true;
-                                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-                                clearButtonNotifier.notifyListeners();
-                              }
-                            },
-                            decoration: const InputDecoration(
-                              hintText: 'Search By Category Name..',
-                              border: InputBorder.none,
-                              icon: Icon(
-                                Icons.search,
-                                // color: textClr,
-                              ),
-                            ),
-                          ),
-                          Visibility(
-                            visible: clearButtonNotifier.value,
-                            child: IconButton(
-                              onPressed: () {
-                                clearcntrl.clear();
-                                setState(() {
-                                  clearButtonNotifier.value = false;
-                                });
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
+    Provider.of<CategoryProvider>(context, listen: false).refreshUI();
+    return Consumer<TransactionProvider>(
+      builder: (context, transactionProviderClass, child) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: mainColor,
+            title: const Text('All Transactions'),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    showPopupMenu1();
+                  },
+                  icon: const Icon(Icons.sort)),
+              IconButton(
+                  onPressed: () {
+                    showPopupMenu();
+                  },
+                  icon: const Icon(Icons.calendar_month))
             ],
           ),
-          ValueListenableBuilder(
-            valueListenable: TransactionDb.instance.transactionListNotifier,
-            builder:
-                (BuildContext ctx, List<TranscationModel> newList, Widget? _) {
-              return Expanded(
-                  child: newList.isNotEmpty
+          body: Column(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Consumer<TransactionProvider>(
+                      builder: (context, value, child) {
+                        return Card(
+                          elevation: 9,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            child: Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                TextField(
+                                  controller: clearcntrl,
+                                  onChanged: (value) {
+                                    Provider.of<TransactionProvider>(context,
+                                            listen: false)
+                                        .search(value);
+
+                                    if (value.isEmpty) {
+                                      clearButtonNotifier.value = false;
+                                      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                                      clearButtonNotifier.notifyListeners();
+                                    } else {
+                                      clearButtonNotifier.value = true;
+                                      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                                      clearButtonNotifier.notifyListeners();
+                                    }
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Search By Category Name..',
+                                    border: InputBorder.none,
+                                    icon: Icon(
+                                      Icons.search,
+                                      // color: textClr,
+                                    ),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: clearButtonNotifier.value,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      clearcntrl.clear();
+                                      setState(() {
+                                        clearButtonNotifier.value = false;
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                  child: transactionProviderClass.transactionList.isNotEmpty
                       ? ListView.separated(
-                          itemBuilder: (ctx, index) {
-                            final value = newList[index];
+                          itemBuilder: (ctx, id) {
+                            final value =
+                                transactionProviderClass.transactionList[id];
                             return Slidable(
                               key: Key(value.id!),
                               endActionPane: ActionPane(
@@ -135,19 +137,54 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                                   children: [
                                     SlidableAction(
                                       onPressed: (ctx) {
-                                        showAlert(context, index);
+                                        value;
+                                         showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title:const Text('Delete'),
+                                                    content:const Text(
+                                                        'Are you sure?Do you want to delete this transaction?'),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child:
+                                                             const Text('Cancel')),
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            context
+                                                                .read<
+                                                                    TransactionProvider>()
+                                                                .deletTransaction(
+                                                                    value.id!);
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child:const Text('Ok'))
+                                                    ],
+                                                  );
+                                                });
                                       },
                                       icon: Icons.delete,
                                       label: 'Delete',
                                     ),
                                     SlidableAction(
                                       onPressed: (ctx) {
+                                        Provider.of<CategoryProvider>(context,
+                                                listen: false)
+                                            .refreshUI();
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) =>
                                                     EditTransaction(
                                                       data: value,
-                                                      id: index,
+                                                      id: id, model: value,
                                                     )));
                                       },
                                       icon: Icons.edit,
@@ -189,10 +226,11 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                             );
                           },
                           // ignore: prefer_is_empty
-                          itemCount: newList.length)
+                          itemCount:
+                              transactionProviderClass.transactionList.length)
                       : Center(
                           child: Padding(
-                            padding:const EdgeInsets.only(top: 49),
+                            padding: const EdgeInsets.only(top: 49),
                             child: Column(
                               children: [
                                 const SizedBox(height: 4),
@@ -211,45 +249,15 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
                               ],
                             ),
                           ),
-                        ));
-            },
-          )
-        ],
-      ),
+                        ))
+            ],
+          ),
+        );
+      },
     );
   }
 
-  void showAlert(BuildContext context, int index) {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: const Text(
-              'Do you want to delete',
-              style: TextStyle(color: Color.fromARGB(255, 228, 15, 15)),
-            ),
-            content: const Text(
-                'All the related datas will be cleared from the database'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: const Text("No")),
-              TextButton(
-                  onPressed: () {
-                    TransactionDb.instance.deletTransaction(index);
-                    Navigator.of(ctx).pop();
-
-                    balanceAmount();
-                    TransactionDb.instance.refresh();
-                    filterFunction();
-                  },
-                  child: const Text("Yes"))
-            ],
-          );
-        });
-  }
+  
 
   void showPopupMenu() async {
     await showMenu(
@@ -258,7 +266,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
       items: [
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filterDataByDate('all');
+              // TransactionDb.instance.filterDataByDate('all');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filterDataByDate('all');
             },
             child: const Text(
               'All',
@@ -266,7 +276,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             )),
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filterDataByDate('today');
+              // TransactionDb.instance.filterDataByDate('today');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filterDataByDate('today');
             },
             child: const Text(
               'Today',
@@ -274,7 +286,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             )),
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filterDataByDate('yesterday');
+              //TransactionDb.instance.filterDataByDate('yesterday');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filterDataByDate('yesterday');
             },
             child: const Text(
               'Yesterday',
@@ -282,7 +296,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             )),
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filterDataByDate('last week');
+              // TransactionDb.instance.filterDataByDate('last week');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filterDataByDate('last week');
             },
             child: const Text(
               'Last Week',
@@ -300,8 +316,12 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
       items: [
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filter('All');
-              TransactionDb.instance.refresh();
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filter('All');
+              // TransactionDb.instance.filter('All');
+              // TransactionDb.instance.refresh();
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .refresh();
             },
             child: const Text(
               'All',
@@ -309,7 +329,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             )),
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filter('Income');
+              // TransactionDb.instance.filter('Income');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filter("Income");
             },
             child: const Text(
               'Income',
@@ -317,7 +339,9 @@ class _VeiwAllScreenState extends State<VeiwAllScreen> {
             )),
         PopupMenuItem(
             onTap: () {
-              TransactionDb.instance.filter('Expense');
+              // TransactionDb.instance.filter('Expense');
+              Provider.of<TransactionProvider>(context, listen: false)
+                  .filter("Expense");
             },
             child: const Text(
               'Expense',

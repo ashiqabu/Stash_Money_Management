@@ -14,8 +14,8 @@ class TranscationModel {
   final CategoryType type;
   @HiveField(4)
   final CategoryModel category;
-@HiveField(5)
-   String? id;
+  @HiveField(5)
+  String? id;
 
   TranscationModel({
     required this.note,
@@ -23,8 +23,6 @@ class TranscationModel {
     required this.date,
     required this.type,
     required this.category,
-  }){
-    id=DateTime.now().microsecondsSinceEpoch.toString();
-  }
-  
+    required this.id,
+  });
 }

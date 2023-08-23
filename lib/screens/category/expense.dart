@@ -1,107 +1,91 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:stash_project/db/category/category_db.dart';
-import '../../models/category/category_model.dart';
+import 'package:provider/provider.dart';
+import 'package:stash_project/models/category/category_model.dart';
+import '../../provider.dart/category_provider.dart';
 
-class ExpenseScreen extends StatefulWidget {
-  const ExpenseScreen({super.key});
+class ExpenseScreen extends StatelessWidget {
+  const ExpenseScreen({Key? key}) : super(key: key);
 
-  @override
-  State<ExpenseScreen> createState() => _ExpenseScreenState();
-}
-
-class _ExpenseScreenState extends State<ExpenseScreen> {
-  bool check1 = false;
-
-  bool transactionCancellDelation = false;
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: CategoryDB().expanseCAtegoryListListener,
-        builder: (BuildContext ctx, List<CategoryModel> newList, Widget? _) {
-          return newList.isNotEmpty
-              ? GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: newList.length > 700 ? 6 : 2,
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 5,
-                      mainAxisExtent: 120),
-                  itemBuilder: (ctx, index) {
-                    final category = newList[index];
-                    return Card(
-                      elevation: 40,
+    return Consumer<CategoryProvider>(
+      builder: (context, categoryProvider, _) {
+        return categoryProvider.expenseCategoryList.isNotEmpty
+            ? GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5,
+                  mainAxisSpacing: 5,
+                  mainAxisExtent: 100,
+                ),
+                itemBuilder: (ctx, index) {
+                  final category = categoryProvider.expenseCategoryList[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Card(
+                      elevation: 8,
                       shadowColor: Colors.black,
-                      margin: const EdgeInsets.all(15),
                       color: const Color.fromARGB(255, 166, 165, 240),
                       child: ListTile(
-                        title: Text(category.name),
+                        title: Text(
+                          category.name,
+                          style: const TextStyle(fontSize: 15),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         trailing: IconButton(
-                            onPressed: () {
-                              showAlert(context, index);
-                            },
-                            icon: const Icon(Icons.close)),
-                      ),
-                    );
-                  },
-                  itemCount: newList.length)
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        "  No transactions yet !",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.grey,
+                          onPressed: () {
+                            _showDeleteDialog(context, category);
+                          },
+                          icon: const Icon(Icons.close),
                         ),
                       ),
-                    ],
+                    ),
+                  );
+                },
+                itemCount: categoryProvider.expenseCategoryList.length,
+              )
+            : const Center(
+                child: Text(
+                  "No transactions yet!",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.grey,
                   ),
-                );
-        });
+                ),
+              );
+      },
+    );
   }
 
-  void showAlert(BuildContext context, int index) {
+  void _showDeleteDialog(BuildContext context, CategoryModel category) {
     showDialog(
-        context: context,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (context, setState) => AlertDialog(
-              title: Text(
-                'Do you want to delete ${CategoryDB().expanseCAtegoryListListener.value[index].name}',
-                style: const TextStyle(color: Color.fromARGB(255, 228, 15, 15)),
-              ),
-              content: Row(
-                children: const [
-                  Expanded(
-                    flex: 4,
-                    child: SizedBox(
-                      child: Text(
-                        'All the related datas will be cleared from the database',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                    },
-                    child: const Text("No")),
-                TextButton(
-                    onPressed: () {
-                      CategoryDB.instance.deleteCategory(CategoryDB()
-                          .expanseCAtegoryListListener
-                          .value[index]
-                          .id);
-                      Navigator.of(ctx).pop();
-                    },
-                    child: const Text("Yes"))
-              ],
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(
+            'Do you want to delete ${category.name}?',
+            style: const TextStyle(color: Color.fromARGB(255, 228, 15, 15)),
+          ),
+          content:
+              const Text('All related data will be cleared from the database.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: const Text("No"),
             ),
-          );
-        });
+            TextButton(
+              onPressed: () {
+                Provider.of<CategoryProvider>(context, listen: false)
+                    .deleteCategorys(category.id);
+                Navigator.of(ctx).pop();
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

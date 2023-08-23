@@ -1,312 +1,410 @@
-import 'dart:io';
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:stash_project/balance/balance.dart';
+import 'package:provider/provider.dart';
 import 'package:stash_project/core/constants.dart';
-import 'package:stash_project/db/category/category_db.dart';
-import 'package:stash_project/db/transaction/transaction_db.dart';
-import 'package:stash_project/models/category/category_model.dart';
-import 'package:stash_project/models/transaction/transaction_model.dart';
-import '../../../db/chart/chart_db.dart';
+import '../../../models/category/category_model.dart';
+import '../../../models/transaction/transaction_model.dart';
+import '../../../provider.dart/category_provider.dart';
+import '../../../provider.dart/edit_transaction_provider.dart';
+import '../../../provider.dart/transaction_provider.dart';
 
-// ignore: must_be_immutable
 class EditTransaction extends StatefulWidget {
-  TranscationModel data;
-  final int id;
-  EditTransaction({super.key, required this.data, required this.id});
+  const EditTransaction(
+      {super.key,
+      required this.model,
+      required int id,
+      required TranscationModel data});
+  final TranscationModel model;
 
   @override
   State<EditTransaction> createState() => _EditTransactionState();
 }
 
 class _EditTransactionState extends State<EditTransaction> {
-  final noteEditcntrl = TextEditingController();
-  TextEditingController amountEditingcntrl = TextEditingController();
-  final formkey = GlobalKey<FormState>();
-  DateTime? selectedDate;
-  CategoryType? selectedCategoryType;
-  CategoryModel? selectedcategoryModel;
-  String? categoryID;
+  DateTime? _selectedDate;
+  CategoryType? selectedCategorytype;
+  CategoryModel? selectedCategoryModel;
+
+  final _purposeTextEditingController = TextEditingController();
+  final _amountTextEditingController = TextEditingController();
 
   @override
   void initState() {
-    selectedCategoryType = widget.data.type;
-    selectedDate = widget.data.date;
-    amountEditingcntrl.text = widget.data.amount.toString();
-    noteEditcntrl.text = widget.data.note;
+    _purposeTextEditingController.text = widget.model.note;
+    _amountTextEditingController.text = widget.model.amount.toString();
+     _selectedDate = widget.model.date;
+    selectedCategorytype = widget.model.type;
+     selectedCategoryModel = widget.model.category;
+   
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    CategoryDB.instance.refreshUI();
-    // var provider;
+    // log(widget.model.id.toString(),name: 'buildcon');
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainColor,
-        title: const Text('Add Transaction'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Form(
-          key: formkey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Row(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: mainColor,
+          title: const Text(
+            'Edit Transaction',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
+          elevation: 0,
+        ),
+        body: Consumer<EditTransactionsProvider>(
+          builder: (context, provider, _) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Radio(
-                              activeColor: mainColor,
-                              value: CategoryType.income,
-                              groupValue: selectedCategoryType,
-                              onChanged: (newvalue) {
-                                setState(() {
-                                  selectedCategoryType = CategoryType.income;
-                                  categoryID = null;
-                                });
-                              }),
-                          const Text('Income'),
+                          Row(
+                            children: [
+                              Radio(
+                                  value: CategoryType.income,
+                                  groupValue: provider.selectedCategorytype,
+                                  activeColor: mainColor,
+                                  onChanged: (newValue) {
+                                    provider.updateSelectedCategoryType(
+                                        CategoryType.income);
+                                    provider.updateCategoryId(null);
+                                    // log('hello');
+                                  }),
+                              const Text(
+                                'Income',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            width: 50,
+                          ),
+                          Row(
+                            children: [
+                              Radio(
+                                  value: CategoryType.expense,
+                                  groupValue: provider.selectedCategorytype,
+                                  activeColor: mainColor,
+                                  onChanged: (newValue) {
+                                    provider.updateSelectedCategoryType(
+                                        CategoryType.expense);
+                                    provider.updateCategoryId(null);
+                                  }),
+                              const Text(
+                                'Expense',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       Row(
-                        children: [
-                          Radio(
-                              activeColor: mainColor,
-                              value: CategoryType.expense,
-                              groupValue: selectedCategoryType,
-                              onChanged: (newvalue) {
-                                setState(() {
-                                  selectedCategoryType = CategoryType.expense;
-                                  categoryID = null;
-                                });
-                              }),
-                          const Text('Expense'),
+                        children: const [
+                          Text(
+                            'Category',
+                            style: TextStyle(fontSize: 18),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20, top: 20),
-                    child: Row(
-                      children: const [
-                        Text(
-                          'Category',
-                          style: TextStyle(fontSize: 20),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.075,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset:const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20, top: 10),
-                        child: Container(
-                          width: 325.w,
-                          height: 50.h,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey, width: 1),
-                              borderRadius: BorderRadius.circular(3)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: categoryID,
-                              hint: Text(widget.data.category.name),
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              icon: const Icon(Icons.keyboard_arrow_down),
-                              items: (selectedCategoryType ==
+                              hint:  Text(
+                                widget.model.category.name,
+                              ),
+                              value: provider.categoryID,
+                              items: (provider.selectedCategorytype ==
                                           CategoryType.income
-                                      ? CategoryDB().incomeCAtegoryListListener
-                                      : CategoryDB()
-                                          .expanseCAtegoryListListener)
-                                  .value
+                                      ? context
+                                          .watch<CategoryProvider>()
+                                          .incomeCategoryList
+                                      : context
+                                          .watch<CategoryProvider>()
+                                          .expenseCategoryList)
                                   .map((e) {
                                 return DropdownMenuItem(
-                                    onTap: () {
-                                      selectedcategoryModel = e;
-                                    },
-                                    value: e.id,
-                                    child: Text(e.name));
+                                  value: e.id,
+                                  child: Text(
+                                    e.name,
+                                    style:const TextStyle(color: Colors.black),
+                                  ),
+                                  onTap: () {
+                                    provider.selectedCategoryModel = e;
+                                  },
+                                );
                               }).toList(),
-                              onChanged: (selectedValue) {
-                                setState(() {
-                                  categoryID = selectedValue;
-                                });
+                              onChanged: (selectedValue) async {
+                                await provider.updateCategoryId(selectedValue);
                               },
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
-                child: Row(
-                  children: const [
-                    Text(
-                      'Amount',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 10, right: 20),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  controller: amountEditingcntrl,
-                  maxLength: 10,
-                  decoration: InputDecoration(
-                      hintText: 'Enter The Amount',
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                          onPressed: () {
-                            amountEditingcntrl.clear();
-                          },
-                          icon: const Icon(Icons.clear))),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 0, right: 20),
-                child: Row(
-                  children: const [
-                    Text(
-                      'Date',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: const BorderRadius.all(Radius.circular(5))),
-                  width: 340.w,
-                  height: 50.h,
-                  child: TextButton.icon(
-                      onPressed: () async {
-                        final selectedDatetemp = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now()
-                                .subtract(const Duration(days: 30)),
-                            lastDate: DateTime.now());
-
-                        if (selectedDatetemp == null) {
-                          return;
-                        } else {
-                          stdout.write(selectedDatetemp.toString());
-                          setState(() {
-                            selectedDate = selectedDatetemp;
-                          });
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.calendar_month,
-                        color: Colors.black,
+                      const SizedBox(
+                        height: 10,
                       ),
-                      label: Text(
-                        selectedDate == null
-                            ? 'Select Date'
-                            : DateFormat("dd-MMMM-yyyy").format(selectedDate!),
-                        style: const TextStyle(color: Colors.black),
-                      )),
-                ),
+                      Row(
+                        children: const [
+                          Text(
+                            'Description',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextFormField(
+                          controller: _purposeTextEditingController,
+                          keyboardType: TextInputType.text,
+                          decoration: const InputDecoration(
+                            hintText: 'Description',
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        children: const [
+                          Text(
+                            'Amount',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextFormField(
+                          controller: _amountTextEditingController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                            hintText: 'Amount',
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: const [
+                          Text(
+                            'Date',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.075,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: Theme.of(context).colorScheme.copyWith(
+                                  primary: Colors.black,
+                                ),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () async {
+                              final selectedDateTemp = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now()
+                                    .subtract(const Duration(days: 30)),
+                                lastDate: DateTime.now(),
+                              );
+
+                              if (selectedDateTemp == null) {
+                                return;
+                              } else {
+                                log(selectedDateTemp.toString());
+                                _selectedDate = selectedDateTemp;
+                                provider.updateSelectedDate(selectedDateTemp);
+                              }
+                            },
+                            icon: const Icon(
+                              Icons.calendar_month,
+                              color: Colors.black,
+                            ),
+                            label: Text(
+                              _selectedDate == null
+                                  ? 'Select Date'
+                                  : DateFormat("dd-MMMM-yyyy")
+                                      .format(_selectedDate!),
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+                      Center(
+                        child: Container(
+                          width: 120,
+                          height: 40,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(7),
+                              color: mainColor),
+                          child: TextButton(
+                            onPressed: () {
+                              editTransaction(
+                                provider.selectedCategorytype,
+                                provider.selectedDate,
+                                provider.selectedCategoryModel,
+                                provider.categoryID,
+                              );
+                            },
+                            child: const Text(
+                              'Submit',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ]),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20),
-                child: Row(
-                  children: const [
-                    Text(
-                      'Notes',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
-                child: TextFormField(
-                  controller: noteEditcntrl,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter the purpose',
-                    border: OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 50, horizontal: 10),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: mainColor, shadowColor: Colors.black),
-                    onPressed: () {
-                      if (formkey.currentState!.validate()) {
-                        editTransaction();
-                      }
-                    },
-                    child: const Text(
-                      'Update',
-                    )),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+            );
+          },
+        ));
   }
 
-  Future editTransaction() async {
-    final noteText = noteEditcntrl.text;
-    final amount = amountEditingcntrl.text;
-    if (noteText.isEmpty) {
-      return addingFailed();
+  // ignore: non_constant_identifier_names
+  Future<void> editTransaction(CategoryType Ctype, DateTime? selectedDate,
+      CategoryModel? selectedCategoryModel, String? categoryID) async {
+    final purposeText = _purposeTextEditingController.text.trim();
+    final amountText = _amountTextEditingController.text.trim();
+    if (purposeText.isEmpty) {
+     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please add the Description fields!"),
+        backgroundColor: Colors.red,
+        margin: EdgeInsets.all(10),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+        closeIconColor: Colors.white,
+        duration: Duration(seconds: 2),
+      ));
+      return;
     }
-    if (amount.isEmpty) {
-      return addingFailed();
+    if (amountText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please add the Amount fields!"),
+        backgroundColor: Colors.red,
+        margin: EdgeInsets.all(10),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+        closeIconColor: Colors.white,
+        duration: Duration(seconds: 2),
+      ));
+      return;
     }
     if (categoryID == null) {
-      return addingFailed();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please add the Category fields!"),
+        backgroundColor: Colors.red,
+        margin: EdgeInsets.all(10),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+        closeIconColor: Colors.white,
+        duration: Duration(seconds: 2),
+      ));
+      return;
     }
     if (selectedDate == null) {
-      return addingFailed();
-    }
-    final parsedAmount = double.tryParse(amount);
-    if (parsedAmount == null) {
-      return addingFailed();
-    }
-    if (selectedcategoryModel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please add the Date fields!"),
+        backgroundColor: Colors.red,
+        margin: EdgeInsets.all(10),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+        closeIconColor: Colors.white,
+        duration: Duration(seconds: 2),
+      ));
       return;
     }
 
+    if (selectedCategoryModel == null) {
+      log('120');
+      return;
+    }
+
+    final parsedAmount = double.tryParse(amountText);
+    if (parsedAmount == null) {
+      return;
+    }
+    // log(widget.model.id.toString(),name: 'hjuikjnj');
+
     final model = TranscationModel(
-        note: noteText.trim(),
-        amount: parsedAmount,
-        date: selectedDate!,
-        type: selectedCategoryType!,
-        category: selectedcategoryModel ?? widget.data.category);
-
-    TransactionDb transactionDb = TransactionDb();
-    final index = transactionDb.transactionListNotifier.value
-        .indexOf(transactionDb.transactionListNotifier.value[widget.id]);
-    transactionDb.editTransactionDb(index, model);
+      note: purposeText,
+      amount: parsedAmount,
+      date: selectedDate,
+      type: Ctype,
+      category: selectedCategoryModel, 
+      id: widget.model.id,
+    );
+    
+    await context.read<TransactionProvider>().editTransaction(model);
+     // ignore: use_build_context_synchronously
+    context.read<TransactionProvider>().refresh();
     // ignore: use_build_context_synchronously
+    context.read<TransactionProvider>().balanceAmount();
 
-    // ignore: use_build_context_synchronously
-    Navigator.of(context).pop();
-    TransactionDb.instance.refresh();
-    balanceAmount();
-    filterFunction();
     // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text("Data Added SuccessFully"),
@@ -317,17 +415,9 @@ class _EditTransactionState extends State<EditTransaction> {
       closeIconColor: Colors.white,
       duration: Duration(seconds: 2),
     ));
-  }
+    // ignore: use_build_context_synchronously
+    Navigator.of(context).pop();
 
-  void addingFailed() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Please add the remaining fields!"),
-      backgroundColor: Colors.red,
-      margin: EdgeInsets.all(10),
-      behavior: SnackBarBehavior.floating,
-      showCloseIcon: true,
-      closeIconColor: Colors.white,
-      duration: Duration(seconds: 2),
-    ));
+    
   }
 }

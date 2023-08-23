@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stash_project/db/category/category_db.dart';
+import 'package:provider/provider.dart';
 import 'package:stash_project/models/category/category_model.dart';
+import 'package:stash_project/provider.dart/category_provider.dart';
 
 ValueNotifier<CategoryType> selectedCategoryNotifier =
     ValueNotifier(CategoryType.income);
@@ -87,7 +88,9 @@ Future<void> categoryTypePopUp(BuildContext context, type) async {
                         name: name,
                         type: type);
 
-                    CategoryDB.instance.insertCategory(category);
+                    //CategoryDB.instance.insertCategory(category);
+                    Provider.of<CategoryProvider>(context, listen: false)
+                        .insertCategory(category);
 
                     Navigator.of(ctx).pop();
                   },
@@ -123,14 +126,12 @@ class RadioButton extends StatelessWidget {
               return Radio<CategoryType>(
                   activeColor: const Color.fromARGB(225, 53, 9, 85),
                   value: type,
-                  groupValue: selectedCategoryNotifier.value,
+                  groupValue: newCategory,
                   onChanged: (value) {
                     if (value == null) {
                       return;
                     }
                     selectedCategoryNotifier.value = value;
-                    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-                    selectedCategoryNotifier.notifyListeners();
                   });
             }),
         Text(title)
