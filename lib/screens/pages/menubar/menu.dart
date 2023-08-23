@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:stash_project/core/constants.dart';
 import 'package:stash_project/db/profile/profile_db.dart';
-import 'package:stash_project/screens/pages/menubar/addprofile.dart';
 import 'package:stash_project/screens/pages/menubar/privacy_policy.dart';
 import 'package:stash_project/screens/pages/menubar/reset.dart';
 import 'package:stash_project/screens/pages/menubar/terms_and_condition.dart';
