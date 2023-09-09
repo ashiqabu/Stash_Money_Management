@@ -6,6 +6,7 @@ import 'package:stash_project/core/constants.dart';
 import '../../../models/category/category_model.dart';
 import '../../../models/transaction/transaction_model.dart';
 import '../../../provider.dart/category_provider.dart';
+import '../../../provider.dart/chart_provider.dart';
 import '../../../provider.dart/edit_transaction_provider.dart';
 import '../../../provider.dart/transaction_provider.dart';
 
@@ -33,10 +34,9 @@ class _EditTransactionState extends State<EditTransaction> {
   void initState() {
     _purposeTextEditingController.text = widget.model.note;
     _amountTextEditingController.text = widget.model.amount.toString();
-     _selectedDate = widget.model.date;
+    _selectedDate = widget.model.date;
     selectedCategorytype = widget.model.type;
-     selectedCategoryModel = widget.model.category;
-   
+    selectedCategoryModel = widget.model.category;
 
     super.initState();
   }
@@ -131,7 +131,7 @@ class _EditTransactionState extends State<EditTransaction> {
                               color: Colors.grey.withOpacity(0.3),
                               spreadRadius: 2,
                               blurRadius: 5,
-                              offset:const Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
@@ -139,7 +139,7 @@ class _EditTransactionState extends State<EditTransaction> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              hint:  Text(
+                              hint: Text(
                                 widget.model.category.name,
                               ),
                               value: provider.categoryID,
@@ -156,7 +156,7 @@ class _EditTransactionState extends State<EditTransaction> {
                                   value: e.id,
                                   child: Text(
                                     e.name,
-                                    style:const TextStyle(color: Colors.black),
+                                    style: const TextStyle(color: Colors.black),
                                   ),
                                   onTap: () {
                                     provider.selectedCategoryModel = e;
@@ -331,7 +331,7 @@ class _EditTransactionState extends State<EditTransaction> {
     final purposeText = _purposeTextEditingController.text.trim();
     final amountText = _amountTextEditingController.text.trim();
     if (purposeText.isEmpty) {
-     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Please add the Description fields!"),
         backgroundColor: Colors.red,
         margin: EdgeInsets.all(10),
@@ -355,7 +355,7 @@ class _EditTransactionState extends State<EditTransaction> {
       return;
     }
     if (categoryID == null) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Please add the Category fields!"),
         backgroundColor: Colors.red,
         margin: EdgeInsets.all(10),
@@ -395,15 +395,19 @@ class _EditTransactionState extends State<EditTransaction> {
       amount: parsedAmount,
       date: selectedDate,
       type: Ctype,
-      category: selectedCategoryModel, 
+      category: selectedCategoryModel,
       id: widget.model.id,
     );
-    
+
     await context.read<TransactionProvider>().editTransaction(model);
-     // ignore: use_build_context_synchronously
+    // ignore: use_build_context_synchronously
     context.read<TransactionProvider>().refresh();
     // ignore: use_build_context_synchronously
     context.read<TransactionProvider>().balanceAmount();
+    // ignore: use_build_context_synchronously
+    context.read<CategoryProvider>().refreshUI();
+    // ignore: use_build_context_synchronously
+    context.read<ChartProvider>().filterFunction(context);
 
     // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -417,7 +421,5 @@ class _EditTransactionState extends State<EditTransaction> {
     ));
     // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
-
-    
   }
 }
